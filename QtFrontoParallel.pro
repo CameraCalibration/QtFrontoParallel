@@ -19,7 +19,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
 #    capture.cpp \
-    utils.cpp
+    utils.cpp \
+    mainwindow.cpp \
+    cameracalibrator.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -40,5 +42,9 @@ else {
 }
 
 HEADERS += \
-    utils.h
+    utils.h \
+    mainwindow.h \
+    constants.h \
+    cameracalibrator.h \
+    image.h
 #    grid.h \

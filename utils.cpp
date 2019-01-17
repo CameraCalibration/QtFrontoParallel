@@ -2,14 +2,14 @@
 
 #include "utils.h"
 
-bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>& points, bool& isTracking, std::vector<cv::Point2f>& oldPoints){
+bool findRingsGridPattern(cv::Mat Input, cv::Mat& Output, cv::Size size, std::vector<cv::Point2f>& points, bool& isTracking, std::vector<cv::Point2f>& oldPoints){
     // ===================
     // PRE - FILTERS
     // ===================
-    cv::Mat gray;
-    cv::cvtColor(Input,gray,CV_BGR2GRAY);
-    GaussianBlur(gray,gray,Size(3,3),0);
-    adaptiveThreshold(gray,gray,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,41,6);
+//    cv::Mat gray;
+    cv::cvtColor(Input,Output,CV_BGR2GRAY);
+    GaussianBlur(Output,Output,Size(3,3),0);
+    adaptiveThreshold(Output,Output,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,41,6);
 
     //cv::imshow("g",gray);
 
@@ -19,17 +19,17 @@ bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>
     // ===================
     vector<vector<Point>> contours;
     vector<Vec4i> hierachy;
-    findContours(gray.clone(),contours,hierachy,CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE,Point(0,0));
+    findContours(Output.clone(),contours,hierachy,CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE,Point(0,0));
     //cv::imshow("g",gray);
 
     vector<RotatedRect>minEllipse(contours.size());
 
-    cv::cvtColor(gray,gray, CV_GRAY2BGR); // <------------- Cambiamos a color
+    cv::cvtColor(Output,Output, CV_GRAY2BGR); // <------------- Cambiamos a color
     // Fitear una elipse a los contornos detectados
     for( int i = 0; i < contours.size(); i++ ){
         //minRect[i] = minAreaRect( Mat(contours[i]) );
         //Scalar color( rand()&255, rand()&255, rand()&255 );
-        drawContours( gray, contours, i, Scalar(0,255,255), 1, 8);
+        drawContours( Output, contours, i, Scalar(0,255,255), 1, 8);
         if( contours[i].size() > 4 ){
             minEllipse[i] = fitEllipse( Mat(contours[i]) ); }
 
@@ -55,15 +55,15 @@ bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>
                 if(hierachy[child_index][0] == -1 && hierachy[child_index][1] == -1 && hierachy[child_index][2] == -1){
                     selected.push_back(minEllipse[i]);
                     selected.push_back(minEllipse[child_index]);
-                    ellipse( gray, minEllipse[i], Scalar(0,0,255), 1, 8 );
-                    ellipse( gray, minEllipse[child_index], Scalar(0,0,255), 1, 8 );          
+                    ellipse( Output, minEllipse[i], Scalar(0,0,255), 1, 8 );
+                    ellipse( Output, minEllipse[child_index], Scalar(0,0,255), 1, 8 );
                 }
             }
         }
     }
 
     //Como minimo debemos capturar 40 elipses para continuar
-    cv::imshow(windowGray,gray);
+    //cv::imshow(windowGray,gray);
     if(selected.size() < 40) return false;
 
     //cv::imshow("g",gray);
@@ -79,9 +79,9 @@ bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>
     vector<Point2f> CPs;
     CPs = getControlPoints(centers);
     for(int i = 0; i < CPs.size();i++)
-        circle(gray,CPs[i],1,Scalar(0,0,255),3,8);
+        circle(Output,CPs[i],1,Scalar(0,0,255),3,8);
 
-    cv::imshow(windowGray,gray);
+    //cv::imshow(windowGray,gray);
     if(CPs.size() < 20) return false;
 
 
@@ -133,10 +133,10 @@ bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>
 
 
     for(int i = 0; i < CPs.size();i++){
-        circle(gray,CPs[i],5,Scalar(255,0,0),3,8);
+        circle(Output,CPs[i],5,Scalar(255,0,0),3,8);
     }
     
-    cv::imshow(windowGray,gray);
+    //cv::imshow(windowGray,gray);
     if(CPs.size() < 20) return false;
 
     
@@ -192,7 +192,7 @@ bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>
         //cout << "Start Tracking\n";
         // Buscamos encontrar el patron, devolvemos solo el numero correspondiente de nodos
         // Ademas Ordenamos los nodos, primero por fila, luego por columna
-        bool patternWasFound = FindRingPattern(CPs,gray,4,5);
+        bool patternWasFound = FindRingPattern(CPs,Output,4,5);
         //patternWasFound = false;
 
         //Esta parte del codigo debe enviar 20 puntos Ordenados y en grilla hacia TrackedPoints
@@ -203,14 +203,14 @@ bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>
             trackedPoints.clear();
             for(int i = 0; i < numTrackedItems; i++){
                 trackedPoints.push_back(CPs[i]);
-                circle(gray,CPs[i],5,Scalar(255,0,0),3,8);
+                circle(Output,CPs[i],5,Scalar(255,0,0),3,8);
             }
 
             isTracking = true;
         }
     }
 
-    cv::imshow(windowGray,gray);
+    //cv::imshow(windowGray,gray);
 
     // Copiamos el vector a points que seran nuestros CPs
     points = trackedPoints;

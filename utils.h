@@ -1,5 +1,5 @@
-#ifndef INCLUDES_H
-#define INCLUDES_H value
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@ enum Pattern{CHESSBOARD,CIRCLES_GRID,ASYMMETRIC_CIRCLES_GRID,RINGS_GRID};
 enum modes{DETECT_MODE,CALIBRATION_MODE,UNDISTORTION_MODE};
 
 //RING GRID FUNCTION
-bool findRingsGridPattern(cv::Mat Input, cv::Size size, std::vector<cv::Point2f>& points, bool& isTracking, std::vector<cv::Point2f>& oldPoints);
+bool findRingsGridPattern(cv::Mat Input, cv::Mat& Output, cv::Size size, std::vector<cv::Point2f>& points, bool& isTracking, std::vector<cv::Point2f>& oldPoints);
 // RING PATTERN DETECTION ADDITIONAL FUNCTIONS
 vector<Point2f> getControlPoints(const vector<Point2f> & centers);
 bool FindRingPattern(vector<Point2f> &probableCPs,cv::Mat & frame,int num_rows,int num_cols);
@@ -79,4 +79,4 @@ std::vector<cv::Point2f> getFrontoParallelCorners(cv::Size imgSize, cv::Size pat
 
 vector<Point2f>  distortion(vector<Point2f> cp,const cv::Mat& intrinsics,const cv::Mat& dist_coeff );
 
-#endif // INCLUDES_H
+#endif // UTILS_H
