@@ -47,4 +47,3 @@ HEADERS += \
     constants.h \
     cameracalibrator.h \
     image.h
-#    grid.h \

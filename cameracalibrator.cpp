@@ -7,10 +7,10 @@
 #include <set>
 #include <fstream>
 
-#define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/img/test/"
+#define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/QtFrontoParallel/imgs/cam2/"
 
 int patternType = RINGS_GRID;
-int noImages = 30; // Numero de imagenes para la Calibración
+int noImages = 70; // Numero de imagenes para la Calibración
 int noIterations = 30;
 float squareSize = 0.044;//0.04540;//meters
 //cv::Size imgPixelSize = Size(640,480); // Tamaño de la imagen

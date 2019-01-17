@@ -214,11 +214,11 @@ void MainWindow::visualizeImage(int id, QImage img, std::string title)
         title2->setText(QString::fromStdString(title));
         break;
     case PROC3:
-        img3->setPixmap(image.scaled(img3->size()));
+        img3->setPixmap(image.scaled(img3->size(), Qt::KeepAspectRatio));
         title3->setText(QString::fromStdString(title));
         break;
     case PROC4:
-        img4->setPixmap(image.scaled(img4->size()));
+        img4->setPixmap(image.scaled(img4->size(), Qt::KeepAspectRatio));
         title4->setText(QString::fromStdString(title));
         break;
     case PROC5:
