@@ -10,10 +10,10 @@
 #define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/img/test/"
 
 int patternType = RINGS_GRID;
-int noImages = 20; // Numero de imagenes para la Calibración
+int noImages = 30; // Numero de imagenes para la Calibración
 int noIterations = 30;
-float squareSize = 0.04540;//meters
-cv::Size imgPixelSize = Size(640,480); // Tamaño de la imagen
+float squareSize = 0.044;//0.04540;//meters
+//cv::Size imgPixelSize = Size(640,480); // Tamaño de la imagen
 cv::Size patternSize = cv::Size(5,4);
 
 
@@ -125,7 +125,7 @@ void CameraCalibrator::processingPattern()
 
     // Calibracion Iterativa
     vector<float> rms_set;
-    std::vector<cv::Point2f> fronto_corners = getFrontoParallelCorners(imgPixelSize,patternSize);
+    std::vector<cv::Point2f> fronto_corners = getFrontoParallelCorners(frame.size(),patternSize);
 
     FOR(it,noIterations)
     {
@@ -137,7 +137,7 @@ void CameraCalibrator::processingPattern()
         // cout << imgPoints.size() << endl;
 
         // Comenzamos la Calibracion
-        rms = cv::calibrateCamera(objPoints,imgPoints, imgPixelSize,cameraMatrix,distCoeffs,rvecs,tvecs);
+        rms = cv::calibrateCamera(objPoints,imgPoints, frame.size(),cameraMatrix,distCoeffs,rvecs,tvecs);
         cout << it << " " << cameraMatrix.at<double>(0,0) << " " << cameraMatrix.at<double>(1,1) <<
         " " << cameraMatrix.at<double>(0,2) << " " << cameraMatrix.at<double>(1,2) << " " << rms << " ";
 
@@ -155,7 +155,7 @@ void CameraCalibrator::processingPattern()
             visualizer->visualizeImage(PROCFIN, ImageHelper::convertMatToQimage(frame), "Input");
 
             cv::Mat temp = frame.clone();
-            cv::Mat OptimalMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, Size(640,480), 1.0);
+            cv::Mat OptimalMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, frame.size(), 1.0);
             cv::undistort(temp,frame,cameraMatrix,distCoeffs,OptimalMatrix);
             visualizer->visualizeImage(PROC2, ImageHelper::convertMatToQimage(frame), "Undistort");
 
@@ -172,7 +172,7 @@ void CameraCalibrator::processingPattern()
 
             //Transformacion Fronto Parallel
             cv::Mat imgWarp;
-            cv::warpPerspective(frame,imgWarp,H,Size(320,240));
+            cv::warpPerspective(frame,imgWarp,H,Size(300,240));
             visualizer->visualizeImage(PROC3, ImageHelper::convertMatToQimage(imgWarp), "FrontoParallel");
 
             PointBuffer.clear();
