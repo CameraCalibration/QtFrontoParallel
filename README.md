@@ -18,6 +18,10 @@ Implementation of Fronto Parallel algorithm in C++ and Qt.
  ``
  
  *  Open QtCreator and open the file **QtFrontoParallel.pro**.
+ *  Change the dataset directory in the file **cameracalibrator.cpp** using the flag: 
+ ``
+ #define path "(directory solution)/imgs/cam1"
+ ``
  *  Finally, build using the architecture of home.
  
 ## Contact
