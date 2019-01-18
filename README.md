@@ -33,6 +33,7 @@ Implementation of Fronto Parallel algorithm in C++ and Qt.
  
  Just press the start button:
  
+ ![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/start_button.png "Start Button")
  
  ## Results
  
