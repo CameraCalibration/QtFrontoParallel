@@ -6,11 +6,12 @@
 #include <iterator>
 #include <set>
 #include <fstream>
+#include <QFile>
 
-#define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/QtFrontoParallel/imgs/cam2/"
+#define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/cam1/imgs/cam1/"
 
 int patternType = RINGS_GRID;
-int noImages = 70; // Numero de imagenes para la Calibración
+int noImages = 30; // Numero de imagenes para la Calibración
 int noIterations = 30;
 float squareSize = 0.044;//0.04540;//meters
 //cv::Size imgPixelSize = Size(640,480); // Tamaño de la imagen
@@ -98,7 +99,6 @@ void CameraCalibrator::processingPattern()
     FOR(i,noImages){
 
         string filename = path + std::to_string(i)  +  ".jpg";
-
         frame = cv::imread(filename,CV_LOAD_IMAGE_COLOR);
         visualizer->visualizeImage(PROCFIN, ImageHelper::convertMatToQimage(frame), windowName);
 

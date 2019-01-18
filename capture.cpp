@@ -11,8 +11,8 @@ g++ -std=c++11 capture.cpp `pkg-config opencv --cflags --libs` -o capture && ./c
 
 #define windowName "video"
 
-#define video_path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/cam2/anillos.avi"
-#define image_path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/QtFrontoParallel/imgs/cam2/"
+#define video_path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/cam1/anillos.mp4"
+#define image_path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/QtFrontoParallel/imgs/cam1/"
 
 int main(){
 	cv::VideoCapture cap(video_path);
@@ -22,7 +22,7 @@ int main(){
 
 	cv::Mat frame;
 
-    int count = 40;
+    int count = 30;
 	std::cout << "==================================\n";
 	std::cout << "Opciones:\n" << "\tx : Capturar Imagen\n" << "\tc : Pasar al Siguiente\n" << "\tESC : Terminar\n";
 	std::cout << "==================================\n";

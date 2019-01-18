@@ -47,3 +47,5 @@ HEADERS += \
     constants.h \
     cameracalibrator.h \
     image.h
+
+RESOURCES +=
