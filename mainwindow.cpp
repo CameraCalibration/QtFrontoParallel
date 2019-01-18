@@ -122,7 +122,8 @@ void MainWindow::createActions()
     loadAct = new QAction(tr("&Load"), this);
     loadAct->setShortcuts(QKeySequence::New);
     loadAct->setStatusTip(tr("Load a Video"));
-    loadAct->setChecked(true);
+//    loadAct->setChecked(true);
+    loadAct->setEnabled(false);
     connect(loadAct, &QAction::triggered, this, &MainWindow::loadVideo);
 
     startAct = new QAction(tr("&Start"), this);

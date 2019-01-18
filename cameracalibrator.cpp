@@ -8,7 +8,7 @@
 #include <fstream>
 #include <QFile>
 
-#define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/cam1/imgs/cam1/"
+#define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/QtFrontoParallel/imgs/cam1/"
 
 int patternType = RINGS_GRID;
 int noImages = 30; // Numero de imagenes para la Calibración
