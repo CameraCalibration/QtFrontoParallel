@@ -29,6 +29,12 @@ Implementation of Fronto Parallel algorithm in C++ and Qt.
  ``
  *  Finally, build using the architecture of home.
  
+ ## Run the Application
+ 
+ Just press the start button:
+ 
+ ![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/start_button.png "Start Button")
+ 
  ## Results
  
  *  Using **Cam1** with 30 frames: 
