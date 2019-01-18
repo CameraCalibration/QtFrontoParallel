@@ -22,7 +22,27 @@ Implementation of Fronto Parallel algorithm in C++ and Qt.
  ``
  #define path "(directory solution)/imgs/cam1"
  ``
+ *  Change the number of frames to use in the file **cameracalibrator.cpp** (at line 14):
+ 
+ ``
+ int noImages = 30;
+ ``
  *  Finally, build using the architecture of home.
+ 
+ ## Results
+ 
+ *  Using **Cam1** with 30 frames: 
+ 
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam1_rms.png "RMS Cam01")
+
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam1_centers.png "Centers Cam01")
+ 
+ *  Using **Cam2** with 70 frames: 
+ 
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam2_rms.png "RMS Cam02")
+
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam2_centers.png "Centers Cam02")
+ 
  
 ## Contact
 If you need any help you can contact me to:
