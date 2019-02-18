@@ -8,9 +8,9 @@
 #include <fstream>
 #include <QFile>
 
-#define PATH "E:/Maestria/Imagenes/CameraCalibration/QtFrontoParallel/imgs/cam2/"
-#define ASPECT 16.0/9.0
-#define noImages 70
+#define PATH "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/QtFrontoParallel/imgs/cam1/"
+#define ASPECT 4.0/3.0 //16.0/9.0
+#define noImages 30
 #define noIterations 14
 
 int patternType = RINGS_GRID;
@@ -127,7 +127,7 @@ void CameraCalibrator::processingPattern()
     vector<float> rms_set;
     std::vector<cv::Point2f> fronto_corners = getFrontoParallelCorners(frame.size(),patternSize);
     std::string path_init(PATH);
-    std::string path_fin(PATH"/tmp");
+    std::string path_fin(PATH"/tmp/");
     FOR(it,noIterations)
     {
         // cout << "=================================\n";
