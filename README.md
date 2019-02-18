@@ -59,6 +59,9 @@ Implementation of Fronto Parallel algorithm in C++ and Qt.
 
 ![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam2_centers.png "Centers Cam02")
  
+## Demo
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/IJqGoJFB6e4/0.jpg)](https://www.youtube.com/watch?v=IJqGoJFB6e4)
  
 ## Contact
 If you need any help you can contact me to:
