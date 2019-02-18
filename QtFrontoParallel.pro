@@ -29,16 +29,16 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-OPENCV_DIR = "D:\opt\opencv\build"
+OPENCV_DIR = "C:\opencv\build"
 
 INCLUDEPATH += $$OPENCV_DIR/include
 QMAKE_LIBDIR += $$OPENCV_DIR/x64/vc15/lib
 
 CONFIG(debug, debug|release) {
-    LIBS += -lopencv_world344d
+    LIBS += -lopencv_world345d
 }
 else {
-    LIBS += -lopencv_world344
+    LIBS += -lopencv_world345
 }
 
 HEADERS += \

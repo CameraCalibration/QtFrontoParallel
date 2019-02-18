@@ -2,6 +2,77 @@
 
 #include "utils.h"
 
+// Parametros del thresholding
+#define DIV_S   15
+#define Tr       0.15f
+
+///
+/// \brief Funcion que aplica Thresholding Adaptativo, este algo está basado en el paper
+/// "Adaptive Thresholding Using the Integral Image" de Derek Bradley y Gerhard Roth
+/// \param input    Imagen en escala de grises que será segmentada
+/// \return         Imagen binaria resultante
+///
+cv::Mat adaptiveThresholdIntegralImage(cv::Mat input)
+{
+    // Ancho y altura de la imagen
+    int w = input.cols;
+    int h = input.rows;
+    // Tamaño de la ventana S = (w/DIV_S)
+    int s2 = (w / DIV_S) / 2;
+    // Declaracion de variables auxiliares
+    int sum = 0;
+    int count = 0;
+    int x1, x2, y1, y2;
+
+    // Imagen integral
+    unsigned long *intImg;
+    intImg = (unsigned long *)malloc(sizeof(unsigned long)*h*w);
+
+    // Imagen binaria de salida
+    cv::Mat binImg(h, w, CV_8UC1);
+
+    // Calculo de la imagen integral basado en los valores de los pixeles de input
+    for (int i = 0; i < h; i++) {
+        sum = 0;
+        for(int j = 0; j < w; j++) {
+            sum += input.at<uchar>(i,j);
+            if (i == 0)
+                intImg[i*w + j] = sum;
+            else
+                intImg[i*w + j] = intImg[(i-1)*w + j] + sum;
+        }
+    }
+
+    // Se aplica thresholding y se obtiene la imagen binaria
+    for (int i = 0; i < h; i++) {
+        for(int j = 0; j < w; j++) {
+            // Valores (x1,y1) y (x2,y2) de la ventana SxS
+            x1 = j - s2;
+            x2 = j + s2;
+            y1 = i - s2;
+            y2 = i + s2;
+
+            // Verificación de bordes
+            if(x1 < 0) x1 = 0;
+            if(x2 >= w) x2 = w - 1;
+            if(y1 < 0) y1 = 0;
+            if(y2 >= h) y2 = h - 1;
+
+            count = (x2 - x1) * (y2 - y1);
+            sum = intImg[y2*w + x2] - intImg[y1*w + x2] - intImg[y2*w + x1] + intImg[y1*w + x1];
+
+            // Proceso de binarización
+            if((input.at<uchar>(i,j) * count) <= (sum * (1.0 - Tr)))
+                binImg.at<uchar>(i,j) = 0;
+            else
+                binImg.at<uchar>(i,j) = 255;
+        }
+    }
+
+    free(intImg);
+    return binImg;
+}
+
 bool findRingsGridPattern(cv::Mat Input, cv::Mat& Output, cv::Size size, std::vector<cv::Point2f>& points, bool& isTracking, std::vector<cv::Point2f>& oldPoints){
     // ===================
     // PRE - FILTERS
@@ -9,8 +80,9 @@ bool findRingsGridPattern(cv::Mat Input, cv::Mat& Output, cv::Size size, std::ve
 //    cv::Mat gray;
     cv::cvtColor(Input,Output,CV_BGR2GRAY);
     GaussianBlur(Output,Output,Size(3,3),0);
-    adaptiveThreshold(Output,Output,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,41,6);
+    adaptiveThreshold(Output,Output,255,cv::ADAPTIVE_THRESH_GAUSSIAN_C,cv::THRESH_BINARY,41,6);
 
+    //Output = adaptiveThresholdIntegralImage(Output.clone());
     //cv::imshow("g",gray);
 
     
@@ -24,7 +96,7 @@ bool findRingsGridPattern(cv::Mat Input, cv::Mat& Output, cv::Size size, std::ve
 
     vector<RotatedRect>minEllipse(contours.size());
 
-    cv::cvtColor(Output,Output, CV_GRAY2BGR); // <------------- Cambiamos a color
+    //cv::cvtColor(Output,Output, CV_GRAY2BGR); // <------------- Cambiamos a color
     // Fitear una elipse a los contornos detectados
     for( int i = 0; i < contours.size(); i++ ){
         //minRect[i] = minAreaRect( Mat(contours[i]) );
@@ -217,6 +289,225 @@ bool findRingsGridPattern(cv::Mat Input, cv::Mat& Output, cv::Size size, std::ve
 
     return isTracking;
 }
+
+
+bool findRingsGridPatternWOBlur(cv::Mat Input, cv::Mat& Output, cv::Size size, std::vector<cv::Point2f>& points, bool& isTracking, std::vector<cv::Point2f>& oldPoints){
+    // ===================
+    // PRE - FILTERS
+    // ===================
+//    cv::Mat gray;
+    cv::cvtColor(Input,Output,CV_BGR2GRAY);
+    //GaussianBlur(Output,Output,Size(3,3),0);
+    adaptiveThreshold(Output,Output,255,cv::ADAPTIVE_THRESH_GAUSSIAN_C,cv::THRESH_BINARY,41,6);
+
+    //Output = adaptiveThresholdIntegralImage(Output.clone());
+    //cv::imshow("g",gray);
+
+
+    // ===================
+    // ELLIPSIS DETECTION
+    // ===================
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierachy;
+    findContours(Output.clone(),contours,hierachy,CV_RETR_TREE,CV_CHAIN_APPROX_SIMPLE,Point(0,0));
+    //cv::imshow("g",gray);
+
+    vector<RotatedRect>minEllipse(contours.size());
+
+    //cv::cvtColor(Output,Output, CV_GRAY2BGR); // <------------- Cambiamos a color
+    // Fitear una elipse a los contornos detectados
+    for( int i = 0; i < contours.size(); i++ ){
+        //minRect[i] = minAreaRect( Mat(contours[i]) );
+        //Scalar color( rand()&255, rand()&255, rand()&255 );
+        drawContours( Output, contours, i, Scalar(0,255,255), 1, 8);
+        if( contours[i].size() > 4 ){
+            minEllipse[i] = fitEllipse( Mat(contours[i]) ); }
+
+        //if( contours[i].size() == 4)
+        //    minEllipse[i] = cv::minAreaRect( Mat(contours[i]) );
+    }
+
+    //Filtrar las ellipses
+
+    vector<RotatedRect> selected;
+    for( int i = 0; i< contours.size(); i++ ){
+        float w = minEllipse[i].size.width;
+        float h = minEllipse[i].size.height;
+        float c_x = minEllipse[i].center.x;
+        float c_y = minEllipse[i].center.y;
+        float dif = w - h;
+
+        //ellipse( gray, minEllipse[i], Scalar(0,0,255), 1, 8 );
+
+        if(abs(dif) < 40){ //-->>> CAMBIAR ESTE PARAMETRO PARA FILTRAR LAS ELIPSES
+            if(hierachy[i][2] != -1){ // Si el Contour tiene Hijo que hijo sea unico
+                int child_index = hierachy[i][2];
+                if(hierachy[child_index][0] == -1 && hierachy[child_index][1] == -1 && hierachy[child_index][2] == -1){
+                    selected.push_back(minEllipse[i]);
+                    selected.push_back(minEllipse[child_index]);
+                    ellipse( Output, minEllipse[i], Scalar(0,0,255), 1, 8 );
+                    ellipse( Output, minEllipse[child_index], Scalar(0,0,255), 1, 8 );
+                }
+            }
+        }
+    }
+
+    //Como minimo debemos capturar 40 elipses para continuar
+    //cv::imshow(windowGray,gray);
+    if(selected.size() < 40) return false;
+
+    //cv::imshow("g",gray);
+
+    //Extraemos los centros de todas las elipses Seleccionadas
+    //cout << "Number Selected Ellipsises: " << selected.size() << endl;
+    vector<Point2f> centers;
+    for( int i = 0; i < selected.size(); i++ ){
+        centers.push_back(selected[i].center);
+    }
+
+    //Eliminamos Duplicados y nos quedamos con el promedio de Centros similares('permanezcan a un conjunto de elipses')
+    vector<Point2f> CPs;
+    CPs = getControlPoints(centers);
+    for(int i = 0; i < CPs.size();i++)
+        circle(Output,CPs[i],1,Scalar(0,0,255),3,8);
+
+    //cv::imshow(windowGray,gray);
+    if(CPs.size() < 20) return false;
+
+
+    //cv::imshow(windowGray,gray);
+
+    //=============================
+    // Calculating the mediana
+    //=============================
+    vector<Point2f> tmpCPs;
+    vector<Point2f> c1 = CPs;
+    vector<Point2f> c2 = CPs;
+    sort(c1.begin(),c1.end(),cmpx);
+    sort(c2.begin(),c2.end(),cmpy);
+
+    int n = c1.size()/2;
+    float xm = c1[ n ].x;
+    float ym = c2[ n ].y;
+
+    // Esta parte debe ayudar a validar nuestros PC
+    // Como maximo deberiamos tener 20
+    // Ademas debe ordenarlos de la sgte manera fila por fila, columna por columna
+    // Debe retornar true si se cumplen los requisitos
+    int r;
+    for(r = 1; r < 200; r++){
+        int count = 0;
+        for(int i = 0; i < CPs.size(); i++){
+            if(dist(Point2f(xm,ym),CPs[i]) < r)
+                count++;
+        }
+        //================================================
+        // Hace una verificacion fuerte de 20 elementos!!!!
+        //================================================
+        if(count >= 20){
+            break;
+        }
+
+    }
+
+    //Displaying the range Circles
+    int padding = 30;
+    for(int i = 0; i < CPs.size(); i++)
+        if(dist(Point2f(xm,ym),CPs[i]) < r +padding)
+            tmpCPs.push_back(CPs[i]);
+
+    //cout << "Filtered Control Points(Median): "<< tmpCPs.size() <<endl;
+
+    CPs.clear();
+    CPs = tmpCPs;
+
+
+    for(int i = 0; i < CPs.size();i++){
+        circle(Output,CPs[i],5,Scalar(255,0,0),3,8);
+    }
+
+    //cv::imshow(windowGray,gray);
+    if(CPs.size() < 20) return false;
+
+
+
+    // ===========================================
+    // ORDERING AND SETTINGS POINTS ( Tracking )
+    // ===========================================
+    std::vector<Point2f> trackedPoints;
+    int numTrackedItems = 20;
+
+
+    if(isTracking){
+        trackedPoints.resize(numTrackedItems);
+        std::vector<float> distances;
+        for(int k = 0; k < numTrackedItems;k++){
+            //Point2f tmp = oldPoints[k]; // Aqui esta el error
+            float min = 100000.0f;
+            int index = 0;
+            for(int i = 0; i < CPs.size(); i++){
+                if( min > dist(oldPoints[k],CPs[i]) ){
+                    min = dist(oldPoints[k],CPs[i]);
+                    index = i;
+                }
+            }
+            distances.push_back(dist(oldPoints[k],CPs[index]));
+            trackedPoints[k] = CPs[index]; // Actualizamos la posicion de los puntos
+        }
+        bool isCorrect = true;
+
+        float dstddev = StandarDesviation(distances);
+
+        //Aumentar validaciones en esta zona
+        if(dstddev > 3.0f)
+            isCorrect = false;
+
+        //Revisar que np haya duplicados
+        for(int i = 0; i < trackedPoints.size()-1;i++)
+            for(int j = i+1; j < trackedPoints.size();j++)
+                if(trackedPoints[i] == trackedPoints[j])
+                    isCorrect = false;
+
+        //Si no es correcto el mandar señal para tratar de capturar el tracking
+        if(!isCorrect){
+            cout << "Couldnt keep tracking\n";
+            isTracking = false;
+        }
+
+    }
+
+    //isTracking = false;
+    //if(!isTracking){
+    else{
+        //cout << "Start Tracking\n";
+        // Buscamos encontrar el patron, devolvemos solo el numero correspondiente de nodos
+        // Ademas Ordenamos los nodos, primero por fila, luego por columna
+        bool patternWasFound = FindRingPattern(CPs,Output,4,5);
+        //patternWasFound = false;
+
+        //Esta parte del codigo debe enviar 20 puntos Ordenados y en grilla hacia TrackedPoints
+        //En cualquier otro caso debe pasar al siguiente frame y tratar otra vez
+        //El ordenamiento a pasar es el siguiente
+
+        if(patternWasFound){
+            trackedPoints.clear();
+            for(int i = 0; i < numTrackedItems; i++){
+                trackedPoints.push_back(CPs[i]);
+                circle(Output,CPs[i],5,Scalar(255,0,0),3,8);
+            }
+
+            isTracking = true;
+        }
+    }
+
+    //cv::imshow(windowGray,gray);
+
+    // Copiamos el vector a points que seran nuestros CPs
+    points = trackedPoints;
+
+    return isTracking;
+}
+
 
 void calcBoardCornerPositions(cv::Size size, float squareSize, std::vector<cv::Point3f> &corners, int patternType){
     corners.clear();
@@ -578,6 +869,7 @@ std::vector<cv::Point2f> extractCorners(std::vector<cv::Point2f>& v, cv::Size si
 
 std::vector<cv::Point2f> getFrontoParallelCorners(cv::Size imgSize, cv::Size patternSize){
     float tx = 40.0f, ty = 30.0f;
+    //float tx = 80.0f, ty = 60.0f;
     float dim = 45.0f;
     
     std::vector<cv::Point2f> corners;

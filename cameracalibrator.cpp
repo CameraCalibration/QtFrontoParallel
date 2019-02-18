@@ -8,15 +8,14 @@
 #include <fstream>
 #include <QFile>
 
-#define path "D:/opt/windows/Microsoft/VisualStudio/repos/CameraCalibration/QtFrontoParallel/imgs/cam1/"
+#define PATH "E:/Maestria/Imagenes/CameraCalibration/QtFrontoParallel/imgs/cam2/"
+#define ASPECT 16.0/9.0
+#define noImages 70
+#define noIterations 14
 
 int patternType = RINGS_GRID;
-int noImages = 30; // Numero de imagenes para la Calibración
-int noIterations = 30;
 float squareSize = 0.044;//0.04540;//meters
-//cv::Size imgPixelSize = Size(640,480); // Tamaño de la imagen
 cv::Size patternSize = cv::Size(5,4);
-
 
 CameraCalibrator::CameraCalibrator(QObject *parent) : QObject(parent)
 {
@@ -92,13 +91,14 @@ void CameraCalibrator::processingPattern()
     //Variables para guardar los Valores de Correccion
     double rms;
     cv::Mat cameraMatrix = cv::Mat::eye(3,3,CV_64F); // Matriz para guardar la camera Intrinsics
+    cameraMatrix.at<double>(0,0)= ASPECT;
     cv::Mat distCoeffs = cv::Mat::zeros(8, 1,CV_64F); // Aqui guardamos los coeficientes de Distorsion
     std::vector<cv::Mat> rvecs,tvecs; //Vectores de rotacion y de traslacion para cada frame
 
     //Capturamos las matrices
     FOR(i,noImages){
 
-        string filename = path + std::to_string(i)  +  ".jpg";
+        string filename = PATH + std::to_string(i)  +  ".jpg";
         frame = cv::imread(filename,CV_LOAD_IMAGE_COLOR);
         visualizer->visualizeImage(PROCFIN, ImageHelper::convertMatToQimage(frame), windowName);
 
@@ -126,7 +126,8 @@ void CameraCalibrator::processingPattern()
     // Calibracion Iterativa
     vector<float> rms_set;
     std::vector<cv::Point2f> fronto_corners = getFrontoParallelCorners(frame.size(),patternSize);
-
+    std::string path_init(PATH);
+    std::string path_fin(PATH"/tmp");
     FOR(it,noIterations)
     {
         // cout << "=================================\n";
@@ -149,7 +150,7 @@ void CameraCalibrator::processingPattern()
 
         // Mostrar imagens sin Distorsion
         FOR(i,noImages){
-            string filename = path + std::to_string(i)  +  ".jpg";
+            string filename = path_init + std::to_string(i)  +  ".jpg";
             frame = cv::imread(filename,CV_LOAD_IMAGE_COLOR);
             visualizer->visualizeImage(PROC1, ImageHelper::convertMatToQimage(frame), "Input");
             visualizer->visualizeImage(PROCFIN, ImageHelper::convertMatToQimage(frame), "Input");
@@ -158,7 +159,7 @@ void CameraCalibrator::processingPattern()
             cv::Mat OptimalMatrix = cv::getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, frame.size(), 1.0);
             cv::undistort(temp,frame,cameraMatrix,distCoeffs,OptimalMatrix);
             visualizer->visualizeImage(PROC2, ImageHelper::convertMatToQimage(frame), "Undistort");
-
+            cv::imwrite(path_fin + std::to_string(i)  +  ".jpg", frame);
             std::vector<cv::Point2f> PointBuffer;
             cv::undistortPoints(imgPoints[i], PointBuffer, cameraMatrix, distCoeffs, cv::noArray(),OptimalMatrix);
 
@@ -172,7 +173,7 @@ void CameraCalibrator::processingPattern()
 
             //Transformacion Fronto Parallel
             cv::Mat imgWarp;
-            cv::warpPerspective(frame,imgWarp,H,Size(300,240));
+            cv::warpPerspective(frame,imgWarp,H,Size(320, 240));
             visualizer->visualizeImage(PROC3, ImageHelper::convertMatToQimage(imgWarp), "FrontoParallel");
 
             PointBuffer.clear();
@@ -203,7 +204,8 @@ void CameraCalibrator::processingPattern()
             cv::drawChessboardCorners(imgWarp_inv, patternSize, corrected_points, true);
             cv::drawChessboardCorners(imgWarp_inv, patternSize, imgPoints[i], true);
 
-            imgPoints2.push_back( corrected_points );
+            // imgPoints2.push_back( corrected_points );
+            imgPoints2.push_back( points_buffer2 );
 
             visualizer->visualizeImage(PROC5, ImageHelper::convertMatToQimage(imgWarp_inv), "Reprojection");
             visualizer->visualizeImage(PROC6, ImageHelper::convertMatToQimage(imgWarp_inv), "Reprojection");
@@ -216,13 +218,11 @@ void CameraCalibrator::processingPattern()
 
         }
 
+        path_init = path_fin;
         FOR(i,noImages)
             FOR(j,patternSize.width * patternSize.height){
-                imgPoints[i][j].x = (imgPoints[i][j].x +  imgPoints2[i][j].x) / 2.0;
-                imgPoints[i][j].y = (imgPoints[i][j].y +  imgPoints2[i][j].y) / 2.0;
-
-                /*imgPoints[i][j].x = imgPoints2[i][j].x;
-                imgPoints[i][j].y = imgPoints2[i][j].y;*/
+                imgPoints[i][j].x = imgPoints2[i][j].x; //(imgPoints[i][j].x +  imgPoints2[i][j].x) / 2.0;
+                imgPoints[i][j].y = imgPoints2[i][j].y; //(imgPoints[i][j].y +  imgPoints2[i][j].y) / 2.0;
             }
 
         cout << printAvgColinearity(v) << endl;
