@@ -47,18 +47,21 @@ Implementation of Fronto Parallel algorithm in C++ and Qt.
  
  ## Results
  
- *  Using **LiveCam Microsoft** (cam01) with 14 frames: 
+ *  Using **LiveCam Microsoft** (cam01) with 30 frames and 14 iterations: 
  
-![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam1_rms.png "RMS Cam01")
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam1_rms2.png "RMS Cam01")
 
-![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam1_centers.png "Centers Cam01")
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam1_centers2.png "Centers Cam01")
  
- *  Using **PlayStation 2 Cam** (cam02) with 15 frames: 
+ *  Using **PlayStation 2 Cam** (cam02) with 70 frames and 11 iterations: 
  
-![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam2_rms.png "RMS Cam02")
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam2_rms2.png "RMS Cam02")
 
-![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam2_centers.png "Centers Cam02")
+![alt text](https://raw.githubusercontent.com/CameraCalibration/QtFrontoParallel/master/static/cam2_centers2.png "Centers Cam02")
  
+## Demo
+
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/IJqGoJFB6e4/0.jpg)](https://www.youtube.com/watch?v=IJqGoJFB6e4)
  
 ## Contact
 If you need any help you can contact me to:
